@@ -1,43 +1,44 @@
 const express = require("express");
+const connectDB = require("./config/database");
+const User = require("./models/user");
 
 const app = express();
 
-const { adminAuth,UserAuth } =require("./middlewares/auth")
+// Middleware to parse JSON
+app.use(express.json());
 
-// app.use("/", (req, res) => {
-//     res.send("Hello fr");
-// });
+app.post("/signup", async (req, res) => {
 
-app.use("/test", (req, res) => {
-    res.send("Hello fr test");
+ 
+  try {
+    const user = new User(req.body)
+      await user.save();
+
+    res.send("user added");
+  } catch (err) {
+    res.status(500).send("Error: " + err.message);
+  }
 });
 
-app.get("/user",UserAuth, (req, res) => {
-    res.send({ firstname: "Yash", lastname: "Chopra" });
-}); // this will only handle get calls to /user
+const { adminAuth, UserAuth } = require("./middlewares/auth");
 
-app.post("/user", (req, res) => {
-    res.send("hello to the server");
+app.use("/test", (req, res) => res.send("Hello fr test"));
+
+app.get("/user", UserAuth, (req, res) => {
+  res.send({ firstname: "Yash", lastname: "Chopra" });
 });
 
-app.use("/admin" ,adminAuth)
+app.post("/user", (req, res) => res.send("hello to the server"));
 
+app.use("/admin", adminAuth);
+app.get("/admin/getAllData", (req, res) => res.send("all data sent"));
+app.get("/admin/deleteUser", (req, res) => res.send("all data delete")); // fixed syntax
 
-app.get("/admin/getAllData", (req, res) => {
-
-
-
-   
-        res.send("all data sent");
-    
-
-    
-});
-
-app.get("/admin/DeleteUser", (req, res) => {
-    res.send("all data delete");
-});
-
-app.listen(3000, () => {
-    console.log("Listening on port 3000");
-});
+// Connect DB, then start server
+connectDB()
+  .then(() => {
+    app.listen(3000, () => console.log("Listening on port 3000"));
+  })
+  .catch((err) => {
+    console.error("DB connection failed:", err);
+  });
