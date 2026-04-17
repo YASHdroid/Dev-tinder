@@ -1,38 +1,90 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
-
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const app = express();
+const { UserAuth } = require("./middlewares/auth"); 
 
 // Middleware to parse JSON
 app.use(express.json());
+app.use(cookieParser());
 
-app.post("/signup", async (req, res) => {
+const authrouter = require("./routes/auth")
+const profileRouter = require("./routes/profile")
+const requestRouter = require("./routes/requests")
 
- 
+app.use("/" ,authrouter)
+app.use("/" ,profileRouter)
+app.use("/" ,requestRouter)
+
+
+app.get("/user" , async(req ,res)=>{
+  const usermail = req.query.emailId; 
+
+  try{
+    const user = await User.find({ emailId : usermail }) // ✅ fixed
+
+    res.send(user); 
+  }
+
+  catch (err) {
+    res.status(400).send("something wnet wrong")
+  }
+})
+
+app.delete("/user", async (req, res) => {
+
+  const userId = req.body.userId;
+
   try {
-    const user = new User(req.body)
-      await user.save();
+    const user = await User.findByIdAndDelete(userId);
 
-    res.send("user added");
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    res.send("User deleted successfully");
   } catch (err) {
-    res.status(500).send("Error: " + err.message);
+    res.status(400).send("Error deleting user");
   }
 });
 
-const { adminAuth, UserAuth } = require("./middlewares/auth");
+// update a user
+app.patch("/user", async (req, res) => {
+  const userid = req.body.userId;
+
+  const data = req.body;
+  try {
+
+    const ALLOWED_UPDATES= ["gender","password","about"]
+    const isUpdateAllowed =Object.keys(data).every((k)=>
+    ALLOWED_UPDATES.includes(k)
+    );
+
+    if(!isUpdateAllowed){
+      throw new Error("update not allowed")
+    }
+    const user = await User.findByIdAndUpdate(userid, data);
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    res.send("User updated");
+
+  } catch (err) {
+    res.status(400).send("Error updating user");
+  }
+});
+
+
 
 app.use("/test", (req, res) => res.send("Hello fr test"));
 
-app.get("/user", UserAuth, (req, res) => {
-  res.send({ firstname: "Yash", lastname: "Chopra" });
-});
-
 app.post("/user", (req, res) => res.send("hello to the server"));
 
-app.use("/admin", adminAuth);
-app.get("/admin/getAllData", (req, res) => res.send("all data sent"));
-app.get("/admin/deleteUser", (req, res) => res.send("all data delete")); // fixed syntax
+
 
 // Connect DB, then start server
 connectDB()
