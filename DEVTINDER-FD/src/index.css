@@ -1,0 +1,7 @@
+@import "tailwindcss";
+/* @import "daisyui/theme/dark.css"; */
+@import "daisyui/daisyui.css";
+html, body {
+  background: black;
+}
+  
