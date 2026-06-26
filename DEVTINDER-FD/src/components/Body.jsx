@@ -8,7 +8,7 @@ import Footer from "./Footer";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 
-import { BASE_URL } from "../utils/CONSTANTS";
+import { BASE_URL } from "../utils/constants";
 
 const Body = () => {
 

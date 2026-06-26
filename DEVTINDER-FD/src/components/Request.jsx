@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import axios from "axios";
-import { BASE_URL } from "../utils/CONSTANTS";
+import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 // FIX: import removeRequest (new action) instead of only addRequests
 import { addRequests, removeRequest } from "../utils/RequestSlice";
