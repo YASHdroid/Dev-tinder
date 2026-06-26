@@ -56,7 +56,12 @@ authrouter.post("/login", async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, {
+  httpOnly: true,
+  sameSite: "None",
+  secure: true,
+});
+
     res.send(user);
 
   } catch (err) {
@@ -67,6 +72,9 @@ authrouter.post("/login", async (req, res) => {
 authrouter.post("/logout", async (req, res) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
+    httpOnly: true,
+    sameSite: "None",
+    secure: true,
   });
   res.send();
 });
